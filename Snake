@@ -1,0 +1,275 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace SnakeGame
+{
+    class Program
+    {
+        static async Task Main(string[] args)
+        {
+            bool SB = true; // Spiel Beginnen
+            bool SL = true; // Spiel Läuft
+            int SG = 0; // Spielfeld Größe
+
+            while (SB)
+            {
+                SB = true;
+                Console.Clear();
+                Console.WriteLine("---- ---- ---- ----");
+                Console.WriteLine("Willkommen zum Snake Game!");
+                Console.WriteLine("---- ---- ---- ----");
+                Console.WriteLine("1. Starten");
+                Console.WriteLine("2. Beenden");
+                Console.WriteLine("---- ---- ---- ----");
+                Console.Write("Bitte wählen Sie eine Option: ");
+                string HA = Console.ReadLine(); // Hauptmenü Auswahl
+
+                switch (HA)
+                {
+                    case "1":
+                        Console.Clear();
+                        Console.WriteLine("---- ---- ---- ----");
+                        Console.WriteLine("1. 10x10 Spielfeld");
+                        Console.WriteLine("2. 15x15 Spielfeld");
+                        Console.WriteLine("3. 20x20 Spielfeld");
+                        Console.WriteLine("4. Zurück zum Hauptmenü");
+                        Console.WriteLine("---- ---- ---- ----");
+                        Console.Write("Bitte wählen Sie eine Option: ");
+                        string SGA = Console.ReadLine(); // Spielfeld Größe Auswahl
+
+                        switch (SGA)
+                        {
+                            case "1":
+                                SG = 11; // 10x10 Spielfeld + Rand
+                                break;
+                            case "2":
+                                SG = 16; // 15x15 Spielfeld + Rand
+                                break;
+                            case "3":
+                                SG = 21; // 20x20 Spielfeld + Rand
+                                break;
+                            case "4":
+                                continue;
+                            default:
+                                Console.WriteLine("Ungültige Eingabe, bitte versuchen Sie es erneut.");
+                                continue;
+                        }
+
+                        break;
+                    case "2":
+                        SB = false;
+                        Console.WriteLine("Danke fürs Spielen! Auf Wiedersehen!");
+                        break;
+                    default:
+                        Console.WriteLine("Ungültige Eingabe, bitte versuchen Sie es erneut.");
+                        break;
+                }
+
+                if (SB && SG > 0)
+                {
+                    SL = true;
+                    string[,] SF = new string[SG, SG];
+
+                    List<(int Y, int X)> Snake = new List<(int, int)>
+                        {
+                            (2, 2),
+                            (2, 3),
+                            (2, 4),
+                            (2, 5)
+                        };
+
+                    int R = 4; // Richtung: 1= Hoch, 2 = Runter, 3 = Links, 4 = Rechts
+                    int P = 0; // Punktzahl
+                    Random Ra = new Random();
+
+                    (int Y, int X) A = AG(SG, Ra, Snake);
+
+                    for (int y = 0; y < SF.GetLength(0); y++)
+                    {
+                        for (int x = 0; x < SF.GetLength(1); x++)
+                        {
+                            SF[y, x] = "X";
+                        }
+
+                        for (int x = 0; x < SF.GetLength(1); x++)
+                        {
+                            if (y == 0) // Rand (oben)
+                            {
+                                SF[y, x] = "---";
+                            }
+                            if (y == (SG - 1)) // Rand (unten)
+                            {
+                                SF[y, x] = "---";
+                            }
+                            if (x == 0) // Rand (links)
+                            {
+                                SF[y, x] = "|";
+                            }
+                            if (y == 0 && x == (SG - 1) || y == (SG - 1) && x == (SG - 1))
+                            {
+                                SF[y, x] = "--|";
+                            }
+                            else if (x == (SG - 1)) // Rand (rechts)
+                            {
+                                SF[y, x] = "|";
+                            }
+                        }
+                    }
+
+                    while (SL)
+                    {
+                        if (Console.KeyAvailable) // Richtung Ändern
+                        {
+                            int NR = SdS();
+                            
+                            if (NR != 0)
+                            {
+                                if (!((R == 1 && NR == 2) || (R == 2 && NR == 1) || (R == 3 && NR == 4) || (R == 4 && NR == 3)))
+                                {
+                                    R = NR;
+                                }
+                            }
+                        }
+
+                        var K = Snake[Snake.Count - 1]; // Kopf der Schlange
+                        int NY = K.Y; // Neue Y-Koordinate
+                        int NX = K.X; // Neue X-Koordinate
+
+                        switch (R)
+                        {
+                            case 1: // Hoch
+                                NY--;
+                                break;
+                            case 2: // Runter
+                                NY++;
+                                break;
+                            case 3: // Links
+                                NX--;
+                                break;
+                            case 4: // Rechts
+                                NX++;
+                                break;
+                        }
+
+                        if (NY <= 0 || NY >= (SG - 1) || NX <= 0 || NX >= (SG - 1) || Snake.Contains((NY, NX))) // Kollision mit Rand oder sich selbst
+                        {
+                            SL = false;
+                            Console.WriteLine("---- ---- ---- ----");
+                            Console.WriteLine("Game Over!");
+                            Console.WriteLine($"Punktanzahl: {P}");
+                            Console.WriteLine("---- ---- ---- ----");
+
+                            if (SL == false)
+                            {
+                                break;
+                            }
+                        }
+
+                        Snake.Add((NY, NX)); // Neue Position hinzufügen
+
+                        bool AE = NY == A.Y && NX == A.X; // Apfel Essen
+
+                        if (AE)
+                        {
+                            P++;
+                            A = AG(SG, Ra, Snake); // Neuen Apfel generieren
+                        }
+                        else
+                        {
+                            var T = Snake[0]; // Schwanz der Schlange
+                            Snake.RemoveAt(0); // Schwanz entfernen
+                            SF[T.Y, T.X] = "X"; 
+                        }
+
+                        SF[A.Y, A.X] = "Ap"; // Apfel setzen
+
+                        for (int i = 0; i < Snake.Count; i++)
+                        {
+                            if (i == Snake.Count - 1) // Kopf
+                            {
+                                SF[Snake[i].Y, Snake[i].X] = "He";
+                            }
+                            else // Körper
+                            {
+                                SF[Snake[i].Y, Snake[i].X] = "Bo";
+                            }
+                        }
+
+                        Console.Clear();
+                        SFA(SF); // Spielfeld Anzeigen
+                        Console.WriteLine($"Punktanzahl: {P}");
+                        Task.Delay(250).Wait(); // Spielgeschwindigkeit
+                    }
+                }
+            }
+        }
+
+        static string[,] SFA(string[,] Feld) // Spielfeld Anzeigen
+        {
+            for (int y = 0; y < Feld.GetLength(0); y++)
+            {
+                for (int x = 0; x < Feld.GetLength(1); x++)
+                {
+                    if (Feld[y, x] == "X")
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write("{0,3}",Feld[y, x]);
+                        Console.ResetColor();
+                    }
+                    else if (Feld[y, x] == "Ap")
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.Write("{0,3}",Feld[y, x]);
+                        Console.ResetColor();
+                    }
+                    else if (Feld[y, x] == "|" || Feld[y, x] == "---" || Feld[y, x] == "--|")
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkYellow;
+                        Console.Write("{0,3}",Feld[y, x]);
+                        Console.ResetColor();
+                    }
+                    else
+                    {
+                        Console.Write("{0,3}",Feld[y, x]);
+                    }
+                }
+                Console.WriteLine();
+            }
+            return Feld;
+        }
+
+        static (int Y, int X) AG(int MW, Random rand, List<(int Y, int X)> Snake) // Apfel Generieren
+        {
+            int y;
+            int x;
+
+            do
+            {
+                y = rand.Next(1, (MW - 1));
+                x = rand.Next(1, (MW - 1));
+            } while (Snake.Contains((y, x)));
+            
+            return (y, x);
+        }
+
+        static int SdS() // Steuerung der Schlange
+        {
+            ConsoleKeyInfo E = Console.ReadKey(true);
+
+            switch (E.Key)
+            {
+                case ConsoleKey.UpArrow:
+                    return 1;
+                case ConsoleKey.DownArrow:
+                    return 2;
+                case ConsoleKey.LeftArrow:
+                    return 3;
+                case ConsoleKey.RightArrow:
+                    return 4;
+                default:
+                    return 0;
+            }
+        }
+    }
+}
