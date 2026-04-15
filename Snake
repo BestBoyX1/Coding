@@ -11,6 +11,7 @@ namespace SnakeGame
             bool SB = true; // Spiel Beginnen
             bool SL = true; // Spiel Läuft
             int SG = 0; // Spielfeld Größe
+            int I = 0;
 
             while (SB)
             {
@@ -38,6 +39,11 @@ namespace SnakeGame
                         Console.Write("Bitte wählen Sie eine Option: ");
                         string SGA = Console.ReadLine(); // Spielfeld Größe Auswahl
 
+                        Console.Clear();
+                        Console.WriteLine("---- ---- ---- ----");
+                        Console.Write("Geschwindigkeit eingeben (in Millisekunden):");
+                        int.TryParse(Console.ReadLine(), out I);
+
                         switch (SGA)
                         {
                             case "1":
@@ -59,7 +65,7 @@ namespace SnakeGame
                         break;
                     case "2":
                         SB = false;
-                        Console.WriteLine("Danke fürs Spielen! Auf Wiedersehen!");
+                        Console.WriteLine("Danke für Spielen! Auf Wiedersehen!");
                         break;
                     default:
                         Console.WriteLine("Ungültige Eingabe, bitte versuchen Sie es erneut.");
@@ -122,7 +128,7 @@ namespace SnakeGame
                         if (Console.KeyAvailable) // Richtung Ändern
                         {
                             int NR = SdS();
-                            
+
                             if (NR != 0)
                             {
                                 if (!((R == 1 && NR == 2) || (R == 2 && NR == 1) || (R == 3 && NR == 4) || (R == 4 && NR == 3)))
@@ -179,7 +185,7 @@ namespace SnakeGame
                         {
                             var T = Snake[0]; // Schwanz der Schlange
                             Snake.RemoveAt(0); // Schwanz entfernen
-                            SF[T.Y, T.X] = "X"; 
+                            SF[T.Y, T.X] = "X";
                         }
 
                         SF[A.Y, A.X] = "Ap"; // Apfel setzen
@@ -199,7 +205,7 @@ namespace SnakeGame
                         Console.Clear();
                         SFA(SF); // Spielfeld Anzeigen
                         Console.WriteLine($"Punktanzahl: {P}");
-                        Task.Delay(250).Wait(); // Spielgeschwindigkeit
+                        Task.Delay(I).Wait(); // Spielgeschwindigkeit
                     }
                 }
             }
@@ -214,24 +220,24 @@ namespace SnakeGame
                     if (Feld[y, x] == "X")
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Write("{0,3}",Feld[y, x]);
+                        Console.Write("{0,3}", Feld[y, x]);
                         Console.ResetColor();
                     }
                     else if (Feld[y, x] == "Ap")
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write("{0,3}",Feld[y, x]);
+                        Console.Write("{0,3}", Feld[y, x]);
                         Console.ResetColor();
                     }
                     else if (Feld[y, x] == "|" || Feld[y, x] == "---" || Feld[y, x] == "--|")
                     {
                         Console.ForegroundColor = ConsoleColor.DarkYellow;
-                        Console.Write("{0,3}",Feld[y, x]);
+                        Console.Write("{0,3}", Feld[y, x]);
                         Console.ResetColor();
                     }
                     else
                     {
-                        Console.Write("{0,3}",Feld[y, x]);
+                        Console.Write("{0,3}", Feld[y, x]);
                     }
                 }
                 Console.WriteLine();
@@ -249,7 +255,7 @@ namespace SnakeGame
                 y = rand.Next(1, (MW - 1));
                 x = rand.Next(1, (MW - 1));
             } while (Snake.Contains((y, x)));
-            
+
             return (y, x);
         }
 
